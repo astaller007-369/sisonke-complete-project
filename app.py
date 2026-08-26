@@ -404,6 +404,10 @@ if active_app_tab == "📁   Research & Sentiment Tracker":
     st.subheader("📁  Sisonke Automated Research & Sentiment Desk")
     st.markdown("---")
     
+    # if active_app_tab == "📁   Research & Sentiment Tracker":
+    st.subheader("📁  Sisonke Automated Research & Sentiment Desk")
+    st.markdown("---")
+    
     # --- STAGE 1: READ STORAGE PERSISTENCE SYSTEMS ---
     checklist_save_path = "sisonke_checklist_storage.json"
     database_csv_path = "master_sisonke_database.csv"
@@ -439,8 +443,10 @@ if active_app_tab == "📁   Research & Sentiment Tracker":
         except Exception:
             pass
             
+    # CRASH SHIELD: If no file exists, show a friendly warning panel but KEEP THE PAGE ALIVE!
     if not available_leagues:
         available_leagues = ["No Active Database Connected"]
+        st.warning("⚠️ **Storage Notice:** Your local database file `master_sisonke_database.csv` was not found. Please upload a spreadsheet using the sidebar box to unlock your dropdown lists.")
         
     # --- STAGE 2: INTERACTIVE DROPDOWNS CORE ---
     col_l, col_f = st.columns(2)
@@ -456,7 +462,6 @@ if active_app_tab == "📁   Research & Sentiment Tracker":
         if not filtered_league_df.empty and "home" in filtered_league_df.columns and "away" in filtered_league_df.columns:
             for _, row in filtered_league_df.iterrows():
                 # COMMA DETECTOR RULE: Replaces the old 'NS' lookup completely.
-                # It looks for unplayed matches by checking if goals columns are left blank or split with commas
                 home_goals_raw = str(row.get("home_goals", "")).strip()
                 away_goals_raw = str(row.get("away_goals", "")).strip()
                 
@@ -473,7 +478,7 @@ if active_app_tab == "📁   Research & Sentiment Tracker":
         target_fixture = st.selectbox("Select Target Upcoming Fixture:", options=sorted(list(set(upcoming_fixtures_list))), key="chk_fix_sel")
         
     match_id_key = f"{str(selected_league).lower().replace(' ', '_')}_{str(target_fixture).lower().replace(' ', '_')}"
-    
+            
     
     if match_id_key not in persisted_data:
         persisted_data[match_id_key] = {
