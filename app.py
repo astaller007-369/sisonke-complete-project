@@ -1054,6 +1054,82 @@ else:
 selected_league_filter = st.selectbox("Select Target League Workspace Selection:", uploaded_leagues)
 filtered_df = working_pipeline_df[working_pipeline_df["league_country"].str.lower().str.strip() == selected_league_filter.lower().strip()].reset_index(drop=True)
 settled_past_games = filtered_df.dropna(subset=["home_goals", "away_goals"]).reset_index(drop=True)
+
+# ==============================================================================
+# ULTIMATE SISONKE 49-LEAGUE GOLD MINE STRATEGY ENHANCEMENT (SEGMENT 5)
+# ==============================================================================
+# Comprehensive hardcoded lookup directory mapping each exact requested league to its high-viability market axis
+gold_mine_directory = {
+    "premier division": {"market": "📉 UNDER 2.5 GOALS / DRAW NO BET (1X)", "profile": "Rigid Under-Dispersion, Strong Local Host Bias & Heavy Tactical Gridlocks."},
+    "championship": {"market": "⚖️ ASIAN HANDICAPS (+1.5 / -1.5) / DRAW NO BET", "profile": "Long Calendar Schedule Fatigue & Intense Matchday Squad Rotation."},
+    "league one": {"market": "⚽ BOTH TEAMS TO SCORE (YES) / OVER 2.5 GOALS", "profile": "Physical Direct Play Styles & High Secondary Defensive Errors."},
+    "premier league": {"market": "⚖️ MATCH WINNER (1 OR 2) / TOTAL INDIVIDUAL GOALS OVER 1.5", "profile": "Top-Heavy Quality Domain Gaps & Elite Scoring Clinical Velocity."},
+    "laliga": {"market": "📉 UNDER 2.5 GOALS / MATCH DRAW (X)", "profile": "Strict Tactical Disciplines, Sharp Low-Blocks & Tight scoreline Margins."},
+    "laliga 2": {"market": "📉 DOUBLE CHANCE (1X OR X2) / UNDER 2.5", "profile": "Exceptional Under-Dispersion & Extra Cagey Away Team Setups."},
+    "bundesliga": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "High Box Intensity, Fast Transition Attacks & Open Play Formats."},
+    "2. bundesliga": {"market": "🔥 OVER 2.5 GOALS / TEAM OVER 1.5 GOALS", "profile": "High-Intensity Counter-Pressing Styles & High Chaotic Match Variance."},
+    "serie a": {"market": "📉 UNDER 2.5 GOALS / DRAW NO BET 1", "profile": "Disciplined Formations, Rigid H2H Trends & Sharp Tactical Grids."},
+    "serie b": {"market": "📉 MATCH DRAW (X) / UNDER 2.5 GOALS", "profile": "Highly Defensive Gritty Play Flows & Heavy Outward Under-Dispersion."},
+    "ligue 1": {"market": "📉 UNDER 2.5 GOALS / HOME WIN (1)", "profile": "Physical Defensive Low-Blocks & Deep Local Venue Momentum Bias."},
+    "ligue 2": {"market": "📉 UNDER 2.5 GOALS / EXACT TEAM GOALS UNDER 1.5", "profile": "Rigid Mid-Table Gridlocks & Slow Team Scoring Velocity."},
+    "pro league": {"market": "⚽ BOTH TEAMS TO SCORE (YES) / HOME WIN (1)", "profile": "Balanced Mid-Table Trends & Frequent Dynamic Inflow Market Steams."},
+    "challenger pro league": {"market": "⚖️ MATCH WINNER (1 OR 2) / DRAW NO BET", "profile": "High Weekly Performance Variation & Young Squad Run Dynamics."},
+    "brasileirão série a": {"market": "🏟️ HOME WIN (1) / UNDER 2.5 GOALS", "profile": "Deep Squad Quality Gaps Offset By Severe Long-Distance Travel Fatigue."},
+    "brasileirão série b": {"market": "🏟️ HOME WIN (1) / HOME CLEAN SHEET (YES)", "profile": "Incredibly Rigid Home Ground Advantage Blast Benchmarks Across Standings."},
+    "mls": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "No Relegation Safety Pressure, High Attacking Open Play & Defensive Gaps."},
+    "usl championship": {"market": "⚽ BOTH TEAMS TO SCORE (YES) / OVER 2.5 GOALS", "profile": "High Physical Variance, Frequent Turnover Spikes & Loose Backlines."},
+    "hnl": {"market": "🥇 ASIAN HANDICAP FAVORITES (-1.5)", "profile": "Top-Heavy Quality Gaps & Highly Dominant Trophy Contenders."},
+    "danish superliga": {"market": "⚖️ DRAW NO BET / UNDER 2.5 GOALS", "profile": "Highly Disciplined Formations & Clear Repetitive H2H Trends."},
+    "j1 league": {"market": "⚖️ DRAW NO BET / BOTH TEAMS TO SCORE (YES)", "profile": "High Work-Rate Transition Play & Sudden Tactical Form Breaks."},
+    "eredivisie": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "High Box Intensity & Fast-Paced Transition Attack Blueprints."},
+    "eerste divisie": {"market": "🔥 OVER 2.5 GOALS / TEAM OVER 1.5 GOALS", "profile": "Minimal Defensive Focus & Extreme Annual Generative Squad Turnovers."},
+    "eliteserien": {"market": "🔥 OVER 2.5 GOALS / OVER 3.5 GOAL TOTALS", "profile": "Fast Transition Scoring Velocity & High Outward Probability Dispersion."},
+    "ekstraklasa": {"market": "⚖️ ASIAN HANDICAP UNDERDOGS (+1.5)", "profile": "Highly Unstable Heavy Favorites & Elite Underdog Value Edges."},
+    "liga portugal 2": {"market": "📉 UNDER 2.5 GOALS / DRAW NO BET 1", "profile": "Gritty Defensive Layouts & Exceptionally Narrow Match Margins."},
+    "allsvenskan": {"market": "⚽ BOTH TEAMS TO SCORE (YES)", "profile": "Open Play Blueprints & High Shots on Target (SOT) Finishing Rates."},
+    "super league": {"market": "🔥 OVER 2.5 GOALS / MATCH WINNER (1 OR 2)", "profile": "Heavy Quality Domain Gaps & High Foreign Attacker Investment Bias."},
+    "challenge league": {"market": "🔥 OVER 2.5 GOALS / TEAM OVER 1.5 GOALS", "profile": "High Volatility Scales & Unstable, High-Scoring Defensive Lines."},
+    "chilean primera división": {"market": "📉 UNDER 2.5 GOALS / BOTH TEAMS TO SCORE (NO)", "profile": "Cagey Mid-Table Matches & Intense Late-Season Dead Rubbers."},
+    "serie a (ecuador)": {"market": "📉 UNDER 2.5 GOALS / DOUBLE CHANCE 1X", "profile": "Rigid Under-Dispersion Margins & Heavy Local Pitch Turf Contexts."},
+    "liga 1 (peru)": {"market": "🏠 DRAW NO BET 1 (HOME DNB)", "profile": "Extreme Altitude Splits & Severe Venue Ground Context Distortions."},
+    "primera a": {"market": "🏟️ HOME WIN (1) / HOME CLEAN SHEET (YES)", "profile": "Massive Host Venue Bias & Consistently Low Away Scoring Velocity."},
+    "first league": {"market": "⚖️ DRAW NO BET / UNDER 2.5 GOALS", "profile": "Aggressive Pitch Pressing & High Foul Match Count Densities."},
+    "a-league men": {"market": "🔥 OVER 2.5 GOALS / ASIAN HANDICAP FAVORITES", "profile": "High-Scoring Chaos & Intense End-to-End Box Intensity Formats."},
+    "botola pro": {"market": "📉 UNDER 2.5 GOALS / DRAW NO BET 1X", "profile": "Severe Defensive Gridlocks & Exceptionally Low Goal Dispersion Variance."},
+    "egyptian premier league": {"market": "📉 UNDER 2.5 GOALS / HOME WIN (1)", "profile": "Rigid Low-Block Deep Shapes & Strong Domestic Favorite Dominance."},
+    "trendyol süper lig": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "Volatile Stadium Environments, High Passion Breaks & Open Transitions."},
+    "besta deild karla": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "Severe Matchday Weather outlook Shifts & High Outward Dispersion."},
+    "división profesional": {"market": "🏟️ HOME WIN (1) / OVER 2.5 GOALS", "profile": "Massive Altitude Advantage Discrepancies & Severe Travel Fatigue."},
+    "premiership": {"market": "⚖️ MATCH WINNER / TOTAL GOALS OVER 1.5", "profile": "Highly Direct Physical Play Styles & Steep Quality Gaps."},
+    "indian super league": {"market": "🔥 OVER 2.5 GOALS / BOTH TEAMS TO SCORE (YES)", "profile": "Open Attacking Alignments & Unstable Defensive Transitional Records."},
+    "liga mx apertura": {"market": "⚖️ DRAW NO BET / OVER 2.5 GOALS", "profile": "High Technical Velocity, Fast Transitions & Unpredictable Form Shifts."},
+    "super liga (romania)": {"market": "📉 UNDER 2.5 GOALS / DOUBLE CHANCE 1X", "profile": "Tactical Defensive Playstyles, Low Risk-Taking & Tight scorelines."}
+}
+
+# Normalize the screen dropdown text to lowercase and strip whitespace to match cleanly
+active_league_key_clean = str(selected_league_filter).lower().strip()
+
+st.markdown("---")
+if active_league_key_clean in gold_mine_directory:
+    strategy_payload = gold_mine_directory[active_league_key_clean]
+    
+    # Executive strategy panel display widget
+    st.success(f"💡 **SISONKE GOLD MINE MARKET:** Target **{strategy_payload['market']}**")
+    st.info(f"📊 **League Data Profile Analysis:** {strategy_payload['profile']}")
+else:
+    # Handles dynamic edge cases where text naming strings have added sub-brackets smoothly
+    matched_fallback = False
+    for league_name_key, strategy_payload in gold_mine_directory.items():
+        if league_name_key in active_league_key_clean:
+            st.success(f"💡 **SISONKE GOLD MINE MARKET:** Target **{strategy_payload['market']}**")
+            st.info(f"📊 **League Data Profile Analysis:** {strategy_payload['profile']}")
+            matched_fallback = True
+            break
+            
+    if not matched_fallback:
+        st.warning("💡 **Sisonke Intelligence Strategy Room:** Custom division dataset parsed cleanly. Run a 180-day rolling backtest to extract target value lines.")
+st.markdown("---")
+
 # ==============================================================================
 # SEGMENT 6 OF 14: BREAK-INSULATED TIME TUNER & DUAL DATA CLEARING VAULT
 # ==============================================================================
