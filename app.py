@@ -1334,7 +1334,6 @@ engine = ComprehensivePredictiveRoutingEngine()
 # SEGMENT 8 OF 14: ASYMMETRIC CONTROLS & TEAM-SPECIFIC TURNOVER CHECKBOXES
 # ==============================================================================
 tab_proj, tab_standings, tab_history, tab_past = st.tabs(["🔮 ACTIVE PROJECTIONS MATRIX", "🥇⚽ COMPETITION STANDINGS", "📈📅 PERFORMANCE BACKTESTER", "📈📑 HISTORICAL RESULT LEDGER"])
-
 with tab_proj:
     dash_left, dash_right = st.columns(2)
     
