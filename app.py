@@ -1565,10 +1565,30 @@ with tab_proj:
             for h_g in range(1, max_score_cap):
                 for a_g in range(1, max_score_cap): btts_yes_p += float(prob_matrix[h_g, a_g])
             btts_no_p = max(0.0, min(1.0, 1.0 - btts_yes_p))
-            dc_1X_p = max(0.0, min(1.0, prob_home + prob_draw))
-            dc_X2_p = max(0.0, min(1.0, prob_draw + prob_away))
-            dc_12_p = max(0.0, min(1.0, prob_home + prob_away))
-            win_denominator_sum = prob_home + prob_away
+                        # ==============================================================================
+            # MATH REPAIR: ALL-INCLUSIVE BIVARIATE GRID CELL SUMMATION (SEGMENT 10)
+            # ==============================================================================
+            # 1X Market: Sums up all Home Wins and Draw matrix cells directly
+            dc_1X_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if h_g >= a_g: 
+                        dc_1X_p += float(prob_matrix[h_g, a_g])
+                        
+            # X2 Market: Sums up all Away Wins and Draw matrix cells directly
+            dc_X2_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if a_g >= h_g: 
+                        dc_X2_p += float(prob_matrix[h_g, a_g])
+                        
+            # 12 Market: Sums up all Home Wins and Away Wins, excluding exact draw cells
+            dc_12_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if h_g != a_g: 
+                        dc_12_p += float(prob_matrix[h_g, a_g])
+
             dnb_1_p, dnb_2_p = (float(prob_home / win_denominator_sum), float(prob_away / win_denominator_sum)) if win_denominator_sum > 0 else (0.50, 0.50)
             home_over_15_p = float(np.sum(prob_matrix[2:max_score_cap, :]))
             home_under_15_p = max(0.0, min(1.0, 1.0 - home_over_15_p))
