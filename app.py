@@ -1534,14 +1534,25 @@ with tab_proj:
             a_s = engine.parse_live_team_averages(filtered_df, away_target_key, target_ts, half_life_days, {}, False)
             prob_home, prob_draw, prob_away, prob_matrix = res["market_probabilities"]["1 (Home Win)"], res["market_probabilities"]["X (Draw)"], res["market_probabilities"]["2 (Away Win)"], res["raw_matrix"]
             
+                        # ==============================================================================
+            # MATH REPAIR: PURE DIXON-COLES DEPENDENCY INJECTION MATRIX (SEGMENT 9)
+            # ==============================================================================
             current_active_rho = float(rho_parameter_input)
-            prob_matrix *= (1.0 - current_active_rho)
+            
+            # Apply Rho correlation shifts strictly to low-scoring cell coordinates
+            if max_score_cap > 1:
+                # 0-0 Cell
+                prob_matrix[0, 0] *= (1.0 - (float(h_s.get("avg_goals_scored", 1.2)) * float(a_s.get("avg_goals_scored", 1.2)) * current_active_rho))
+                # 1-0, 0-1, and 1-1 Cells
+                prob_matrix[1, 0] *= (1.0 + current_active_rho)
+                prob_matrix[0, 1] *= (1.0 + current_active_rho)
+                prob_matrix[1, 1] *= (1.0 - current_active_rho)
+            
+            # Normalize the remaining mass cleanly so the entire matrix sums up to exactly 100%
             total_mass_norm = float(np.sum(prob_matrix))
-            if total_mass_norm > 0: prob_matrix /= total_mass_norm
-            prob_home = float(np.sum(np.tril(prob_matrix, -1)))
-            prob_draw = float(np.sum(np.diag(prob_matrix)))
-            prob_away = float(np.sum(np.triu(prob_matrix, 1)))
-        
+            if total_mass_norm > 0: 
+                prob_matrix /= total_mass_norm
+
         # ==============================================================================
 # SEGMENT 10 OF 14: ALTERNATIVE OPTION MARKET MATRIX GENERATOR
 # ==============================================================================
