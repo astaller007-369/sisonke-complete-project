@@ -1266,7 +1266,7 @@ class ComprehensivePredictiveRoutingEngine(SisonkeMathematicalCoreEngine):
         elif tournament_stage == "Single-Elimination Knockout Finals (Neutral Venue)": 
             stage_modifier = 0.90
         
-        raw_prob_matrix = self.generate_bivariate_probability_matrix(1.5 * h_att * stage_modifier, 1.1 * a_att * stage_modifier, max_c)
+        raw_prob_matrix = self.generate_bivariate_probability_matrix(h_att * stage_modifier, a_att * stage_modifier, max_c)
         prob_home = float(np.sum(np.tril(raw_prob_matrix, -1)))
         prob_draw = float(np.sum(np.diag(raw_prob_matrix)))
         prob_away = float(np.sum(np.triu(raw_prob_matrix, 1)))
