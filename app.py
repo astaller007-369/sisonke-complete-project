@@ -1258,13 +1258,16 @@ for idx, league in enumerate(uploaded_leagues):
 # ==============================================================================
 class ComprehensivePredictiveRoutingEngine(SisonkeMathematicalCoreEngine):
     def predict_match_probabilities(self, df, h_team, a_team, ts, base_g, h_att, a_att, h_stat, a_stat, max_c, damp, tournament_stage="Standard Regular Season Schedule"):
+    
+                # DYNAMIC TRIGGER: Reads the actual dispersion profiles of your active league selection block instead of static guesses
         stage_modifier = 1.00
-        if tournament_stage == "Two-Legged Cup Tie: 1st Leg Cagey Strategy": 
-            stage_modifier = 0.85
-        elif tournament_stage == "Two-Legged Cup Tie: 2nd Leg High-Velocity Chase": 
-            stage_modifier = 1.20
-        elif tournament_stage == "Single-Elimination Knockout Finals (Neutral Venue)": 
-            stage_modifier = 0.90
+        if "Cagey" in tournament_stage:
+            stage_modifier = max(0.80, min(0.95, 1.0 - (automatically_tuned_sot_weight * 1.2)))
+        elif "High-Velocity" in tournament_stage:
+            stage_modifier = max(1.05, min(1.25, 1.0 + (automatically_tuned_bc_weight * 0.5)))
+        elif "Knockout Finals" in tournament_stage:
+            stage_modifier = 0.95
+
         
         raw_prob_matrix = self.generate_bivariate_probability_matrix(h_att * stage_modifier, a_att * stage_modifier, max_c)
         prob_home = float(np.sum(np.tril(raw_prob_matrix, -1)))
