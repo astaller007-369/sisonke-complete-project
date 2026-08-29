@@ -1365,6 +1365,11 @@ with tab_proj:
         
         visitor_is_promoted = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🔼 Newly Promoted Side", value=False)
         visitor_has_relegation_threat = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🔽 Active Relegation Threat", value=False)
+
+                # ADDED INJURY RADAR CHECKBOXES
+        host_has_key_injuries = turn_c1.checkbox(f"Host ({h_selected_raw}): 🏥 Key Out (Top Scorer / Center Back Injured)", value=False)
+        visitor_has_key_injuries = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🏥 Key Out (Top Scorer / Center Back Injured)", value=False)
+        
         
         turnover_modifier_h = 1.00
         turnover_modifier_w = 1.00
@@ -1494,6 +1499,18 @@ with tab_proj:
             if referee_strictness_tier == "Hyper-Strict (Card Trigger)": damp_mod *= 1.15
             if apply_h2h_bogey_hex_penalty: h_mod *= 0.95
             hfa_applied = 1.00 if match_venue_ground_setting == "Neutral Ground / Empty-Stadium Lockout" else automatically_tuned_hfa_factor
+                        # ==============================================================================
+            # REAL INJURY & SUSPENSION CAPABILITY DRAIN LOGIC (SEGMENT 9)
+            # ==============================================================================
+            # Shaves off 10% of attacking power and 5% of defensive stability for key losses
+            if host_has_key_injuries:
+                h_mod *= 0.90   # Drops scoring potential due to missing attackers
+                damp_mod *= 1.05 # Increases match chaos because backup defenders add risk
+                
+            if visitor_has_key_injuries:
+                w_mod *= 0.90   # Drops away side scoring velocity
+                damp_mod *= 1.05 # Expands matrix variance blocks
+    
 
             res = engine.predict_match_probabilities(filtered_df, home_target_key, away_target_key, target_ts, baseline_goals, hfa_applied * h_mod, 1.0 * w_mod, {}, {}, max_score_cap, damp_mod, active_tournament_format_stage)
             h_s = engine.parse_live_team_averages(filtered_df, home_target_key, target_ts, half_life_days, {}, False)
