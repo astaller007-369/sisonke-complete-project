@@ -311,15 +311,20 @@ class SisonkeMathematicalCoreEngine:
         df_sorted = df[df["match_timestamp"] < target_timestamp].sort_values(by="match_timestamp", ascending=False)
         home_games = df_sorted[df_sorted["home_team"] == target_team]
         away_games = df_sorted[df_sorted["away_team"] == target_team]
+                # DYNAMIC BACKUP: Formulates initial metrics using your active league variables from Segment 6
+        dynamic_sot_target = round(1.0 / max(0.05, automatically_tuned_sot_weight), 1) if 'automatically_tuned_sot_weight' in locals() else 3.8
         
         metrics_payload = {
-            "avg_goals_scored": 1.45, "avg_goals_conceded": 1.20,
+            "avg_goals_scored": float(historical_goal_mean / 2.0) if 'historical_goal_mean' in locals() else 1.30, 
+            "avg_goals_conceded": float(historical_goal_mean / 2.0) if 'historical_goal_mean' in locals() else 1.30,
             "avg_sot_created": 4.20, "avg_sot_allowed": 3.80,
             "avg_bc_created": 1.30, "avg_bc_allowed": 1.10,
-            "home_sot_to_score": 3.5, "home_sot_to_allow": 3.8,
-            "away_sot_to_score": 3.5, "away_sot_to_allow": 3.8,
+            "home_sot_to_score": dynamic_sot_target, "home_sot_to_allow": dynamic_sot_target,
+            "away_sot_to_score": dynamic_sot_target, "away_sot_to_allow": dynamic_sot_target,
             "avg_box_touches_created": 15.0, "avg_tackles_pct": 0.50, "avg_dribbles_pct": 0.50
-        }
+}
+
+        
         
         if home_games.empty and away_games.empty: return metrics_payload
         
@@ -2005,12 +2010,15 @@ with tab_standings:
             # Baseline dynamic goal extraction path
             calculated_goal_baseline = float(h_s.get("avg_goals_scored", 1.45)) if 'h_s' in locals() else 1.45
             
+                        # UNIFIED BLOCK: Hardens the attack vector using an identical 1.5% structural weight scaling factor
+            avg_touches = t_past["home_box_touches"].mean() if not t_past.empty else 15.0
+            touches_clean = avg_touches if not math.isnan(avg_touches) else 15.0
+            
             team_simulation_profiles[team] = {
                 "base_points": real_points,
-                "att_vector": calculated_goal_baseline + (t_past["home_box_touches"].mean() * 0.01 if not t_past.empty else 0.15),
+                "att_vector": calculated_goal_baseline + (touches_clean * 0.015),
                 "sim_wins": 0
-            }
-            
+                                         }
             simulated_xpts_accumulator = 0.0
             for idx, r in t_past.iterrows():
                 is_home = r["home_team"] == team
