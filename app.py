@@ -1806,9 +1806,13 @@ with tab_proj:
             simulated_a_goals = np.random.poisson(mc_mu_away, mc_runs_pass)
 
             for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build:
-                implied_bk_prob = 1.0 / float(b_odds) if b_odds > 0 else 0.0
-                de_juiced_fair_odds = 1.0 / max(0.001, (implied_bk_prob / bookmaker_market_overround_margin))
-                
+                # ==============================================================================
+# BUG FIX: SYNCHRONIZING DE-JUICED FAIR ODDS WITH MODEL PROBABILITIES (SEGMENT 12)
+# ==============================================================================
+# Fair odds must be derived from the highest probability between your two models
+                 highest_model_probability = max(m_prob, mc_prob_val)
+                 de_juiced_fair_odds = 1.0 / max(0.001, highest_model_probability)
+        
                 # ACCELERATED DYNAMIC MONTE CARLO MAPPING
                 if "HOME WIN" in label: mc_prob_val = float(np.sum(simulated_h_goals > simulated_a_goals) / mc_runs_pass)
                 elif "DRAW MATCH" in label: mc_prob_val = float(np.sum(simulated_h_goals == simulated_a_goals) / mc_runs_pass)
