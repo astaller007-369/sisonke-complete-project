@@ -1805,12 +1805,10 @@ with tab_proj:
             simulated_h_goals = np.random.poisson(mc_lambda_home, mc_runs_pass)
             simulated_a_goals = np.random.poisson(mc_mu_away, mc_runs_pass)
 
-            for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build
-                highest_model_probability = max(m_prob, mc_prob_val)
-                de_juiced_fair_odds = 1.0 / max(0.001, highest_model_probability)
+            # 🟢 FIXED: Added the missing colon (:) at the end of the line
+            for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build:
             
-        
-                # ACCELERATED DYNAMIC MONTE CARLO MAPPING
+                # 🟢 ACCELERATED DYNAMIC MONTE CARLO MAPPING FIRST
                 if "HOME WIN" in label: mc_prob_val = float(np.sum(simulated_h_goals > simulated_a_goals) / mc_runs_pass)
                 elif "DRAW MATCH" in label: mc_prob_val = float(np.sum(simulated_h_goals == simulated_a_goals) / mc_runs_pass)
                 elif "AWAY WIN" in label: mc_prob_val = float(np.sum(simulated_h_goals < simulated_a_goals) / mc_runs_pass)
@@ -1834,6 +1832,11 @@ with tab_proj:
                 elif "DOUBLE CHANCE (X2)" in label: mc_prob_val = float(np.sum(simulated_h_goals <= simulated_a_goals) / mc_runs_pass)
                 elif "DOUBLE CHANCE (12)" in label: mc_prob_val = float(np.sum(simulated_h_goals != simulated_a_goals) / mc_runs_pass)
                 else: mc_prob_val = m_prob
+                
+                # 🟢 FIXED: Now we can safely calculate true fair odds because mc_prob_val is ready!
+                highest_model_probability = max(m_prob, mc_prob_val)
+                de_juiced_fair_odds = 1.0 / max(0.001, highest_model_probability)
+
 
                 # Compute Convergence Percentage & Dual-Engine Edges
                 variance_gap = abs(m_prob - mc_prob_val) * 100
