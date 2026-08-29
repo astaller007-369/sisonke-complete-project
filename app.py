@@ -1351,6 +1351,25 @@ with tab_proj:
                 else: all_teams_labels_map[t_name] = f"{t_name} [â–¼ RELEGATED]"
             else: all_teams_labels_map[t_name] = t_name
 
+         with tab_proj:
+    dash_left, dash_right = st.columns(2)
+    
+    with dash_left:
+        st.markdown("### ♟️🌄 Strategic Context Overrides")
+        all_teams_raw = sorted(list(set(filtered_df["home_team"].dropna().unique()).union(set(filtered_df["away_team"].dropna().unique()))))
+        
+        all_teams_labels_map = {}
+        for t_name in all_teams_raw:
+            t_rows = filtered_df[(filtered_df["home_team"] == t_name) | (filtered_df["away_team"] == t_name)]
+            if len(t_rows) > 0 and len(t_rows) < 5:
+                avg_goals_check = t_rows["home_goals"].mean() if not t_rows[t_rows["home_team"]==t_name].empty else t_rows["away_goals"].mean()
+                if pd.notna(avg_goals_check) and avg_goals_check >= 1.4: 
+                    all_teams_labels_map[t_name] = f"{t_name} [▲ PROMOTED]"
+                else: 
+                    all_teams_labels_map[t_name] = f"{t_name} [▼ RELEGATED]"
+            else: 
+                all_teams_labels_map[t_name] = t_name
+
         h_selected_raw = st.selectbox("Host Selection Profile (1):", all_teams_raw, index=0, format_func=lambda x: all_teams_labels_map.get(x, x))
         a_selected_raw = st.selectbox("Visitor Selection Profile (2):", all_teams_raw, index=min(1, len(all_teams_raw)-1), format_func=lambda x: all_teams_labels_map.get(x, x))
         
@@ -1360,23 +1379,24 @@ with tab_proj:
         st.markdown("##### 🏆✅ Squad Stability & Divisional Turnover Filters")
         turn_c1, turn_c2 = st.columns(2)
         
-        host_is_promoted = turn_c1.checkbox(f"Host ({h_selected_raw}): 🔼 Newly Promoted Side", value=False)
-        host_has_relegation_threat = turn_c1.checkbox(f"Host ({h_selected_raw}): 🔽 Active Relegation Threat", value=False)
+        # CHANGED: Swapped out the old unearned promoted checkboxes for your new Relegated Team Multipliers
+        host_is_relegated = turn_c1.checkbox(f"Host ({h_selected_raw}): 🔽 Newly Relegated from Higher Tier", value=False)
+        host_has_relegation_threat = turn_c1.checkbox(f"Host ({h_selected_raw}): 📉 Active Live-Season Relegation Threat", value=False)
         
-        visitor_is_promoted = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🔼 Newly Promoted Side", value=False)
-        visitor_has_relegation_threat = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🔽 Active Relegation Threat", value=False)
-
-                # ADDED INJURY RADAR CHECKBOXES
+        visitor_is_relegated = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🔽 Newly Relegated from Higher Tier", value=False)
+        visitor_has_relegation_threat = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 📉 Active Live-Season Relegation Threat", value=False)
+        
+        # ADDED INJURY RADAR CHECKBOXES
         host_has_key_injuries = turn_c1.checkbox(f"Host ({h_selected_raw}): 🏥 Key Out (Top Scorer / Center Back Injured)", value=False)
         visitor_has_key_injuries = turn_c2.checkbox(f"Visitor ({a_selected_raw}): 🏥 Key Out (Top Scorer / Center Back Injured)", value=False)
-        
         
         turnover_modifier_h = 1.00
         turnover_modifier_w = 1.00
         
-        if host_is_promoted: turnover_modifier_h *= 1.12
+        # THE NEW SQUAD STABILITY SCALARS: Relegated teams suffer a 10% capability drain due to squad loss
+        if host_is_relegated: turnover_modifier_h *= 0.90
         if host_has_relegation_threat: turnover_modifier_h *= 1.08
-        if visitor_is_promoted: turnover_modifier_w *= 1.12
+        if visitor_is_relegated: turnover_modifier_w *= 0.90
         if visitor_has_relegation_threat: turnover_modifier_w *= 1.08
         
         active_tournament_format_stage = st.radio(
@@ -1414,10 +1434,14 @@ with tab_proj:
             pitch_surface_condition = st.selectbox("On-Pitch Surface State:", ["Standard Optimized Turf", "Waterlogged Mud", "Dry Uneven Grass"])
             weather_climate_outlook = st.selectbox("Matchday Weather Outlook:", ["Clear Sky / Ideal Climate", "Torrential Rain Storm", "Gale-Force Wind Interference"])
             
-            st.markdown("##### 🏟️🧠  Institutional & Psychological Context")
+            st.markdown("##### 🏟️🧠  Institutional & Psychological Context")
             match_venue_ground_setting = st.selectbox("Fixture Venue Ground Context:", ["Standard VenueSplit (Traditional H/A)", "Neutral Ground / Empty-Stadium Lockout"])
-            apply_h2h_bogey_hex_penalty = st.checkbox("Apply Historical H2H Bogey Penalty", value=False)
-            
+                        # TWO ISOLATED BOGEY CHECKBOXES FOR MAXIMUM PRECISION
+            st.markdown("##### 🔮 Psychological H2H Bogey Penalties")
+            c_b1, c_b2 = st.columns(2)
+            home_has_bogey_hex = c_b1.checkbox(f"Host ({h_selected_raw}): Has Historical Bogey Hex here", value=False)
+            away_has_bogey_hex = c_b2.checkbox(f"Visitor ({a_selected_raw}): Has Historical Bogey Hex here", value=False)
+
             c_m1, c_m2 = st.columns(2)
             home_manager_bounce = c_m1.checkbox("Host: New Manager Bounce", value=False)
             away_manager_bounce = c_m2.checkbox("Visitor: New Manager Bounce", value=False)
@@ -1450,9 +1474,6 @@ with tab_proj:
         c9, c10 = st.columns(2)
         odds_over = c9.number_input("Odds Over 2.5:", min_value=1.01, value=1.90, step=0.05)
         odds_under = c10.number_input("Odds Under 2.5:", min_value=1.01, value=1.90, step=0.05)
-# ==============================================================================
-# SEGMENT 9 OF 14: ASYMMETRIC COMPILATION LOOPS & DIXON-COLES RHO INJECTION
-# ==============================================================================
         c11, c12 = st.columns(2)
         odds_btts_y = c11.number_input("Odds BTTS Yes:", min_value=1.01, value=1.80, step=0.05)
         odds_btts_n = c12.number_input("Odds BTTS No:", min_value=1.01, value=2.00, step=0.05)
@@ -1460,7 +1481,7 @@ with tab_proj:
         odds_home_over_15 = c13.number_input("Home Over 1.5:", min_value=1.01, value=2.10)
         odds_home_under_15 = c14.number_input("Home Under 1.5:", min_value=1.01, value=1.65)
         odds_away_over_15 = c15.number_input("Away Over 1.5:", min_value=1.01, value=2.80)
-        odds_away_under_15 = c16.number_input("Away Under 1.5:", min_value=1.01, value=1.38)
+        odds_away_under_15 = c16.number_input("Away Under 1.38:", min_value=1.01, value=1.38)
         c17, c18, c19, c20 = st.columns(4)
         odds_ah_home_minus_15 = c17.number_input("AH Home -1.5:", min_value=1.01, value=3.80)
         odds_ah_away_plus_15 = c18.number_input("AH Away +1.5:", min_value=1.01, value=1.22)
@@ -1482,36 +1503,48 @@ with tab_proj:
             confidence = min(100, int((sd / 10.0) * 100)) if sd > 0 else 50
 
             h_mod, w_mod, damp_mod = 1.0 * turnover_modifier_h, 1.0 * turnover_modifier_w, vol_dampener_adjusted
-            if st.session_state.get("cb_preseason_v1", False): h_mod *= 0.90; w_mod *= 0.90
             if home_manager_bounce: h_mod *= 1.10
             if away_manager_bounce: w_mod *= 1.10
             if home_financial_crisis: h_mod *= 0.85
             if away_financial_crisis: w_mod *= 0.85
             if home_dead_rubber: h_mod *= 0.90; damp_mod *= 0.90
             if away_dead_rubber: w_mod *= 0.90; damp_mod *= 0.90
+            
             h_mod *= (1.0 - (float(home_travel_load_units) * 0.04))
             w_mod *= (1.0 - (float(away_travel_load_units) * 0.04))
+            
             if apply_coastal_climate_shock: w_mod *= 0.95; damp_mod *= 0.92
             if home_blueprint == "Deep Ultra-Defensive Low-Block": h_mod *= 0.85; damp_mod *= 0.82
             if away_blueprint == "Deep Ultra-Defensive Low-Block": w_mod *= 0.85; damp_mod *= 0.82
             if home_lookahead_distraction: h_mod *= 0.88
             if away_lookahead_distraction: w_mod *= 0.88
             if referee_strictness_tier == "Hyper-Strict (Card Trigger)": damp_mod *= 1.15
-            if apply_h2h_bogey_hex_penalty: h_mod *= 0.95
-            hfa_applied = 1.00 if match_venue_ground_setting == "Neutral Ground / Empty-Stadium Lockout" else automatically_tuned_hfa_factor
+            
+            
                         # ==============================================================================
-            # REAL INJURY & SUSPENSION CAPABILITY DRAIN LOGIC (SEGMENT 9)
+            # INDEPENDENT DUAL-DIRECTION PSYCHOLOGICAL BOGEY PENALTY LOGIC (SEGMENT 9)
             # ==============================================================================
-            # Shaves off 10% of attacking power and 5% of defensive stability for key losses
+            # Shaves 5% off the specific team's vector if they suffer from an historical hoodoo
+            if home_has_bogey_hex: 
+                h_mod *= 0.95
+            if away_has_bogey_hex: 
+                w_mod *= 0.95
+
+            
+            # ==============================================================================
+            # REAL INJURY & SUSPENSION CAPABILITY DRAIN MATH INJECTION
+            # ==============================================================================
             if host_has_key_injuries:
-                h_mod *= 0.90   # Drops scoring potential due to missing attackers
-                damp_mod *= 1.05 # Increases match chaos because backup defenders add risk
+                h_mod *= 0.90   
+                damp_mod *= 1.05 
                 
             if visitor_has_key_injuries:
-                w_mod *= 0.90   # Drops away side scoring velocity
-                damp_mod *= 1.05 # Expands matrix variance blocks
-    
+                w_mod *= 0.90   
+                damp_mod *= 1.05 
 
+            hfa_applied = 1.00 if match_venue_ground_setting == "Neutral Ground / Empty-Stadium Lockout" else automatically_tuned_hfa_factor
+
+            # Execution calls pass unskewed variables smoothly into our core routing matrices
             res = engine.predict_match_probabilities(filtered_df, home_target_key, away_target_key, target_ts, baseline_goals, hfa_applied * h_mod, 1.0 * w_mod, {}, {}, max_score_cap, damp_mod, active_tournament_format_stage)
             h_s = engine.parse_live_team_averages(filtered_df, home_target_key, target_ts, half_life_days, {}, False)
             a_s = engine.parse_live_team_averages(filtered_df, away_target_key, target_ts, half_life_days, {}, False)
@@ -1524,6 +1557,7 @@ with tab_proj:
             prob_home = float(np.sum(np.tril(prob_matrix, -1)))
             prob_draw = float(np.sum(np.diag(prob_matrix)))
             prob_away = float(np.sum(np.triu(prob_matrix, 1)))
+
         # ==============================================================================
 # SEGMENT 10 OF 14: ALTERNATIVE OPTION MARKET MATRIX GENERATOR
 # ==============================================================================
