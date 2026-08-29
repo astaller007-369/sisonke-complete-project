@@ -1566,21 +1566,14 @@ with tab_proj:
                 for a_g in range(1, max_score_cap): btts_yes_p += float(prob_matrix[h_g, a_g])
             btts_no_p = max(0.0, min(1.0, 1.0 - btts_yes_p))
                         # ==============================================================================
-            # MATH REPAIR: ALL-INCLUSIVE BIVARIATE GRID CELL SUMMATION (SEGMENT 10)
-            # ==============================================================================
-            # 1X Market: Sums up all Home Wins and Draw matrix cells directly
-            dc_1X_p = 0.0
-            for h_g in range(max_score_cap):
-                for a_g in range(max_score_cap):
-                    if h_g >= a_g: 
-                        dc_1X_p += float(prob_matrix[h_g, a_g])
-                        
-            # X2 Market: Sums up all Away Wins and Draw matrix cells directly
-            dc_X2_p = 0.0
-            for h_g in range(max_score_cap):
-                for a_g in range(max_score_cap):
-                    if a_g >= h_g: 
-                        dc_X2_p += float(prob_matrix[h_g, a_g])
+            # # Forces a clean fallback tuple configuration if the win sum ever zeros out
+            if win_denominator_sum > 0.0001:
+                dnb_1_p = float(prob_home / win_denominator_sum)
+                dnb_2_p = float(prob_away / win_denominator_sum)
+            else:
+                dnb_1_p = 0.50
+                dnb_2_p = 0.50
+    
                         
             # 12 Market: Sums up all Home Wins and Away Wins, excluding exact draw cells
             dc_12_p = 0.0
