@@ -1346,22 +1346,6 @@ with tab_proj:
             t_rows = filtered_df[(filtered_df["home_team"] == t_name) | (filtered_df["away_team"] == t_name)]
             if len(t_rows) > 0 and len(t_rows) < 5:
                 avg_goals_check = t_rows["home_goals"].mean() if not t_rows[t_rows["home_team"]==t_name].empty else t_rows["away_goals"].mean()
-                if pd.notna(avg_goals_check) and avg_goals_check >= 1.4: all_teams_labels_map[t_name] = f"{t_name} [â–² PROMOTED]"
-                else: all_teams_labels_map[t_name] = f"{t_name} [â–¼ RELEGATED]"
-            else: all_teams_labels_map[t_name] = t_name
-
-         with tab_proj:
-    dash_left, dash_right = st.columns(2)
-    
-    with dash_left:
-        st.markdown("### ♟️🌄 Strategic Context Overrides")
-        all_teams_raw = sorted(list(set(filtered_df["home_team"].dropna().unique()).union(set(filtered_df["away_team"].dropna().unique()))))
-        
-        all_teams_labels_map = {}
-        for t_name in all_teams_raw:
-            t_rows = filtered_df[(filtered_df["home_team"] == t_name) | (filtered_df["away_team"] == t_name)]
-            if len(t_rows) > 0 and len(t_rows) < 5:
-                avg_goals_check = t_rows["home_goals"].mean() if not t_rows[t_rows["home_team"]==t_name].empty else t_rows["away_goals"].mean()
                 if pd.notna(avg_goals_check) and avg_goals_check >= 1.4: 
                     all_teams_labels_map[t_name] = f"{t_name} [▲ PROMOTED]"
                 else: 
@@ -1440,7 +1424,8 @@ with tab_proj:
             c_b1, c_b2 = st.columns(2)
             home_has_bogey_hex = c_b1.checkbox(f"Host ({h_selected_raw}): Has Historical Bogey Hex here", value=False)
             away_has_bogey_hex = c_b2.checkbox(f"Visitor ({a_selected_raw}): Has Historical Bogey Hex here", value=False)
-
+            
+            
             c_m1, c_m2 = st.columns(2)
             home_manager_bounce = c_m1.checkbox("Host: New Manager Bounce", value=False)
             away_manager_bounce = c_m2.checkbox("Visitor: New Manager Bounce", value=False)
@@ -1519,7 +1504,7 @@ with tab_proj:
             if away_lookahead_distraction: w_mod *= 0.88
             if referee_strictness_tier == "Hyper-Strict (Card Trigger)": damp_mod *= 1.15
             
-            
+            # FIXED BOGEY FIELD DIRECTION: Multiplies traveler (w_mod) to accurately simulate an away team freezing up
                         # ==============================================================================
             # INDEPENDENT DUAL-DIRECTION PSYCHOLOGICAL BOGEY PENALTY LOGIC (SEGMENT 9)
             # ==============================================================================
@@ -1528,7 +1513,7 @@ with tab_proj:
                 h_mod *= 0.95
             if away_has_bogey_hex: 
                 w_mod *= 0.95
-
+            
             
             # ==============================================================================
             # REAL INJURY & SUSPENSION CAPABILITY DRAIN MATH INJECTION
@@ -1556,7 +1541,7 @@ with tab_proj:
             prob_home = float(np.sum(np.tril(prob_matrix, -1)))
             prob_draw = float(np.sum(np.diag(prob_matrix)))
             prob_away = float(np.sum(np.triu(prob_matrix, 1)))
-
+        
         # ==============================================================================
 # SEGMENT 10 OF 14: ALTERNATIVE OPTION MARKET MATRIX GENERATOR
 # ==============================================================================
