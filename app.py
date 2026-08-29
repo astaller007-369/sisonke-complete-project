@@ -1567,12 +1567,20 @@ with tab_proj:
             btts_no_p = max(0.0, min(1.0, 1.0 - btts_yes_p))
                         # ==============================================================================
             # # Forces a clean fallback tuple configuration if the win sum ever zeros out
+                        # ==============================================================================
+            # COMPACT CRASH-PROOF DRAW NO BET BLOCK (SEGMENT 10)
+            # ==============================================================================
+            # Step 1: Define and calculate the denominator variable first
+            win_denominator_sum = float(prob_home + prob_away)
+
+            # Step 2: Run the safe gate loop now that the variable exists
             if win_denominator_sum > 0.0001:
                 dnb_1_p = float(prob_home / win_denominator_sum)
                 dnb_2_p = float(prob_away / win_denominator_sum)
             else:
                 dnb_1_p = 0.50
                 dnb_2_p = 0.50
+
     
                         
             # 12 Market: Sums up all Home Wins and Away Wins, excluding exact draw cells
