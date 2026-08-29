@@ -1571,9 +1571,30 @@ with tab_proj:
             # COMPACT CRASH-PROOF DRAW NO BET BLOCK (SEGMENT 10)
             # ==============================================================================
             # Step 1: Define and calculate the denominator variable first
-            win_denominator_sum = float(prob_home + prob_away)
+                        # ==============================================================================
+            # CRASH-PROOFED LOGIC COMPILATION SEQUENCE (SEGMENT 10)
+            # ==============================================================================
+            # Step 1: Initialize and run all-inclusive Bivariate Grid Cell Summations for Double Chance
+            dc_1X_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if h_g >= a_g: 
+                        dc_1X_p += float(prob_matrix[h_g, a_g])
+                        
+            dc_X2_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if a_g >= h_g: 
+                        dc_X2_p += float(prob_matrix[h_g, a_g])
+                        
+            dc_12_p = 0.0
+            for h_g in range(max_score_cap):
+                for a_g in range(max_score_cap):
+                    if h_g != a_g: 
+                        dc_12_p += float(prob_matrix[h_g, a_g])
 
-            # Step 2: Run the safe gate loop now that the variable exists
+            # Step 2: Safe Draw No Bet (DNB) Calculations
+            win_denominator_sum = float(prob_home + prob_away)
             if win_denominator_sum > 0.0001:
                 dnb_1_p = float(prob_home / win_denominator_sum)
                 dnb_2_p = float(prob_away / win_denominator_sum)
@@ -1581,33 +1602,36 @@ with tab_proj:
                 dnb_1_p = 0.50
                 dnb_2_p = 0.50
 
-    
-                        
-            # 12 Market: Sums up all Home Wins and Away Wins, excluding exact draw cells
-            dc_12_p = 0.0
-            for h_g in range(max_score_cap):
-                for a_g in range(max_score_cap):
-                    if h_g != a_g: 
-                        dc_12_p += float(prob_matrix[h_g, a_g])
-
-            dnb_1_p, dnb_2_p = (float(prob_home / win_denominator_sum), float(prob_away / win_denominator_sum)) if win_denominator_sum > 0 else (0.50, 0.50)
+            # Step 3: Run Team Under/Over Total Goals Markets
             home_over_15_p = float(np.sum(prob_matrix[2:max_score_cap, :]))
             home_under_15_p = max(0.0, min(1.0, 1.0 - home_over_15_p))
             away_over_15_p = float(np.sum(prob_matrix[:, 2:max_score_cap]))
             away_under_15_p = max(0.0, min(1.0, 1.0 - away_over_15_p))
+            
+            # Step 4: Run Clean Sheet Markets
             home_cs_p = float(np.sum(prob_matrix[:, 0])) 
             away_cs_p = float(np.sum(prob_matrix[0, :])) 
+            
+            # Step 5: Run Asian Handicap Calculations
             ah_home_minus_15_p = 0.0
             for h_g in range(max_score_cap):
                 for a_g in range(max_score_cap):
-                    if (h_g - a_g) > 1.5: ah_home_minus_15_p += float(prob_matrix[h_g, a_g])
+                    if (h_g - a_g) > 1.5: 
+                        ah_home_minus_15_p += float(prob_matrix[h_g, a_g])
+                        
             ah_away_plus_15_p = max(0.0, min(1.0, 1.0 - ah_home_minus_15_p))
+            
             ah_away_minus_15_p = 0.0
             for h_g in range(max_score_cap):
                 for a_g in range(max_score_cap):
-                    if (a_g - h_g) > 1.5: ah_away_minus_15_p += float(prob_matrix[h_g, a_g])
+                    if (a_g - h_g) > 1.5: 
+                        ah_away_minus_15_p += float(prob_matrix[h_g, a_g])
+                        
             ah_home_plus_15_p = max(0.0, min(1.0, 1.0 - ah_away_minus_15_p))
+            
+            # Step 6: Compute Bookmaker House Margin Overround Tax
             bookmaker_market_overround_margin = (1.0 / float(odds_1)) + (1.0 / float(odds_X)) + (1.0 / float(odds_2))
+
             raw_matrix_dictionary_build = [
                 ("HOME WIN (1)", odds_1, prob_home, "MODERATE TRAJECTORY"), ("DRAW MATCH (X)", odds_X, prob_draw, "HIGH-STOCHASTIC LOTTERY"), ("AWAY WIN (2)", odds_2, prob_away, "MODERATE TRAJECTORY"),
                 ("DOUBLE CHANCE (1X)", odds_1X, dc_1X_p, "LOW COIN-FLIP"), ("DOUBLE CHANCE (X2)", odds_X2, dc_X2_p, "LOW COIN-FLIP"), ("DOUBLE CHANCE (12)", odds_12, dc_12_p, "LOW COIN-FLIP"),
