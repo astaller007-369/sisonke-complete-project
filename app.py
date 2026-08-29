@@ -1805,13 +1805,10 @@ with tab_proj:
             simulated_h_goals = np.random.poisson(mc_lambda_home, mc_runs_pass)
             simulated_a_goals = np.random.poisson(mc_mu_away, mc_runs_pass)
 
-            for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build:
-                # ==============================================================================
-# BUG FIX: SYNCHRONIZING DE-JUICED FAIR ODDS WITH MODEL PROBABILITIES (SEGMENT 12)
-# ==============================================================================
-# Fair odds must be derived from the highest probability between your two models
-                 highest_model_probability = max(m_prob, mc_prob_val)
-                 de_juiced_fair_odds = 1.0 / max(0.001, highest_model_probability)
+            for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build
+                highest_model_probability = max(m_prob, mc_prob_val)
+                de_juiced_fair_odds = 1.0 / max(0.001, highest_model_probability)
+            
         
                 # ACCELERATED DYNAMIC MONTE CARLO MAPPING
                 if "HOME WIN" in label: mc_prob_val = float(np.sum(simulated_h_goals > simulated_a_goals) / mc_runs_pass)
