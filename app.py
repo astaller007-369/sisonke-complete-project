@@ -1193,7 +1193,8 @@ if len(settled_past_games) >= 5:
     automatically_tuned_confidence_floor = max(20, min(80, int(round(100 - (stability_proxy * 200)))))
     total_home_goals = settled_past_games["home_goals"].sum()
     total_away_goals = settled_past_games["away_goals"].sum()
-    if total_away_goals > 0: automatically_tuned_hfa_factor = max(1.02, min(1.35, float(round(total_home_goals / total_away_goals, 2))))
+    automatically_tuned_hfa_factor = 1.10
+
 
     total_league_goals = total_home_goals + total_away_goals
     total_league_sot = settled_past_games["home_sot"].sum() + settled_past_games["away_sot"].sum() if "home_sot" in settled_past_games.columns else 1.0
