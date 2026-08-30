@@ -1854,12 +1854,23 @@ with tab_proj:
             st.markdown("---")
             all_markets_rendered_rows = []
             
-            # RUNTIME SIMULATION MATRIX
+                        # ==============================================================================
+            # UNBIASED UNCLAMPED MONTE CARLO SCORING GENERATOR (SEGMENT 12)
+            # ==============================================================================
             mc_runs_pass = 10000
-            mc_lambda_home = float(np.sum(prob_matrix * np.arange(max_score_cap)[:, None]))
-            mc_mu_away = float(np.sum(prob_matrix * np.arange(max_score_cap)[None, :]))
-            simulated_h_goals = np.random.poisson(mc_lambda_home, mc_runs_pass)
-            simulated_a_goals = np.random.poisson(mc_mu_away, mc_runs_pass)
+            
+            # Step A: Pull the true, unskewed expected goal metrics from your active dataset averages
+            base_home_rate = float(h_s.get("avg_goals_scored", 1.35)) if 'h_s' in locals() else 1.35
+            base_away_rate = float(a_s.get("avg_goals_scored", 1.35)) if 'a_s' in locals() else 1.35
+            
+            # Step B: Layer your tactical environmental modifiers dynamically (h_mod and w_mod from Segment 9)
+            true_calculated_home_lambda = base_home_rate * hfa_applied * h_mod
+            true_calculated_away_mu = base_away_rate * w_mod
+            
+            # Step C: Generate 10,000 mock runs based 100% on actual parameters, completely bypassing the flat matrix
+            simulated_h_goals = np.random.poisson(max(0.05, true_calculated_home_lambda), mc_runs_pass)
+            simulated_a_goals = np.random.poisson(max(0.05, true_calculated_away_mu), mc_runs_pass)
+    
 
             # 🟢 FIXED: Added the missing colon (:) at the end of the line
             for label, b_odds, m_prob, risk_tier in raw_matrix_dictionary_build:
