@@ -1193,7 +1193,7 @@ if len(settled_past_games) >= 5:
     automatically_tuned_confidence_floor = max(20, min(80, int(round(100 - (stability_proxy * 200)))))
     total_home_goals = settled_past_games["home_goals"].sum()
     total_away_goals = settled_past_games["away_goals"].sum()
-    automatically_tuned_hfa_factor = 1.10
+    automatically_tuned_hfa_factor = 1.00
 
 
     total_league_goals = total_home_goals + total_away_goals
@@ -1527,8 +1527,7 @@ with tab_proj:
                 w_mod *= 0.90   
                 damp_mod *= 1.05 
 
-            hfa_applied = 1.00 if match_venue_ground_setting == "Neutral Ground / Empty-Stadium Lockout" else automatically_tuned_hfa_factor
-
+            hfa_applied = 1.00
             # Execution calls pass unskewed variables smoothly into our core routing matrices
             res = engine.predict_match_probabilities(filtered_df, home_target_key, away_target_key, target_ts, baseline_goals, hfa_applied * h_mod, 1.0 * w_mod, {}, {}, max_score_cap, damp_mod, active_tournament_format_stage)
             h_s = engine.parse_live_team_averages(filtered_df, home_target_key, target_ts, half_life_days, {}, False)
